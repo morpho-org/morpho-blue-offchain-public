@@ -5,7 +5,7 @@ import {
   http,
   injected,
   serialize,
-  Transport,
+  type Transport,
   unstable_connector,
   WagmiProvider,
 } from "wagmi";
@@ -29,16 +29,16 @@ import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import DashboardPage from "./app/dashboard/page";
-import { Chain, HttpTransportConfig } from "viem";
+import type { Chain, HttpTransportConfig } from "viem";
 import { RequestTrackingProvider } from "./hooks/use-request-tracking";
 
 const httpConfig: HttpTransportConfig = {
-  retryCount: 5,
   retryDelay: 500,
   timeout: 60_000,
+  batch: { batchSize: 10 },
 };
 
-function createFallbackTransport(...rpcUrls: string[]) {
+function createFallbackTransport(rpcUrls: string[]) {
   return fallback([
     unstable_connector(injected, { key: "injected", name: "Injected", retryCount: 2, retryDelay: 100 }),
     ...rpcUrls.map((rpcUrl) => http(rpcUrl, httpConfig)),
@@ -64,20 +64,24 @@ const chains = [
 ] as const;
 
 const transports: Record<(typeof chains)[number]["id"], Transport> = {
-  [mainnet.id]: createFallbackTransport("https://eth.drpc.org"),
-  [base.id]: createFallbackTransport("https://base.drpc.org"),
-  [ink.id]: createFallbackTransport("https://ink.drpc.org"),
-  [optimism.id]: createFallbackTransport("https://optimism.drpc.org"),
-  [arbitrum.id]: createFallbackTransport("https://arbitrum.drpc.org"),
-  [polygon.id]: createFallbackTransport("https://polygon.drpc.org"),
-  [unichain.id]: createFallbackTransport("https://unichain.drpc.org"),
-  [worldchain.id]: createFallbackTransport("https://worldchain.drpc.org"),
-  [scrollMainnet.id]: createFallbackTransport("https://scroll.drpc.org"),
-  [fraxtal.id]: createFallbackTransport("https://fraxtal.drpc.org"),
-  [sonic.id]: createFallbackTransport("https://sonic.drpc.org"),
-  [corn.id]: createFallbackTransport("https://mainnet.corn-rpc.com", "https://maizenet-rpc.usecorn.com"),
-  [modeMainnet.id]: createFallbackTransport("https://mode.drpc.org"),
-  [hemi.id]: createFallbackTransport(),
+  [mainnet.id]: createFallbackTransport(["https://rpc.mevblocker.io", "https://rpc.ankr.com/eth"]),
+  [base.id]: createFallbackTransport([
+    "https://mainnet.base.org",
+    "https://base.lava.build",
+    "https://base.gateway.tenderly.co",
+  ]),
+  [ink.id]: createFallbackTransport(["https://ink.drpc.org"]),
+  [optimism.id]: createFallbackTransport(["https://optimism.lava.build", "https://op-pokt.nodies.app"]),
+  [arbitrum.id]: createFallbackTransport(["https://arbitrum.drpc.org"]),
+  [polygon.id]: createFallbackTransport(["https://polygon.drpc.org"]),
+  [unichain.id]: createFallbackTransport(["https://unichain.drpc.org"]),
+  [worldchain.id]: createFallbackTransport(["https://worldchain.drpc.org"]),
+  [scrollMainnet.id]: createFallbackTransport(["https://scroll.drpc.org"]),
+  [fraxtal.id]: createFallbackTransport(["https://fraxtal.drpc.org"]),
+  [sonic.id]: createFallbackTransport(["https://sonic.drpc.org"]),
+  [corn.id]: createFallbackTransport(["https://mainnet.corn-rpc.com", "https://maizenet-rpc.usecorn.com"]),
+  [modeMainnet.id]: createFallbackTransport(["https://mode.drpc.org"]),
+  [hemi.id]: createFallbackTransport(["https://rpc.hemi.network/rpc"]),
 };
 
 const wagmiConfig = createConfig({
