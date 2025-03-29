@@ -1,8 +1,9 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 import { useClient as useUrqlClient } from "urql";
+import { polygon } from "wagmi/chains";
 
-import { graphql } from "@/graphql/graphql";
+import { graphql, ResultOf } from "@/graphql/graphql";
 
 // NOTE: `state` is currently null; it's a work in progress on API side.
 // Once that's done we can use this (with an orderBy) to get top N by AUM.
@@ -51,11 +52,23 @@ const vaultsQuery = graphql(`
   }
 `);
 
+// NOTE: These curators are always returned _in addition to_ the top N
+const manualCurators: NonNullable<ResultOf<typeof curatorsQuery>["curators"]["items"]> = [
+  {
+    addresses: [{ address: "0xCC3E7c85Bb0EE4f09380e041fee95a0caeDD4a02", chainId: polygon.id }],
+    id: "",
+    image: "https://cdn.morpho.org/v2/assets/images/gauntlet.svg",
+    name: "Gauntlet",
+    state: null,
+    url: "https://www.gauntlet.xyz/",
+  },
+];
+
 export function useTopNCurators({
   n,
   verifiedOnly,
   chainIds,
-  staleTime = 6 * 60 * 60 * 1_000,
+  staleTime = 1 * 60 * 60 * 1_000,
 }: {
   n: number;
   verifiedOnly?: boolean;
@@ -119,6 +132,6 @@ export function useTopNCurators({
 
   return useMemo(() => {
     if (topNCuratorIds === undefined || curators === undefined) return [];
-    return curators.filter((curator) => topNCuratorIds.has(curator.id));
+    return curators.filter((curator) => topNCuratorIds.has(curator.id)).concat(manualCurators);
   }, [topNCuratorIds, curators]);
 }
