@@ -1,3 +1,4 @@
+import { irmAbi } from "@morpho-blue-offchain-public/uikit/assets/abis/irm";
 import { metaMorphoAbi } from "@morpho-blue-offchain-public/uikit/assets/abis/meta-morpho";
 import { metaMorphoFactoryAbi } from "@morpho-blue-offchain-public/uikit/assets/abis/meta-morpho-factory";
 import { morphoAbi } from "@morpho-blue-offchain-public/uikit/assets/abis/morpho";
@@ -6,7 +7,6 @@ import { Sheet, SheetTrigger } from "@morpho-blue-offchain-public/uikit/componen
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -19,10 +19,10 @@ import {
   TooltipTrigger,
 } from "@morpho-blue-offchain-public/uikit/components/shadcn/tooltip";
 import useContractEvents from "@morpho-blue-offchain-public/uikit/hooks/use-contract-events/use-contract-events";
-import { useReadContracts } from "@morpho-blue-offchain-public/uikit/hooks/use-read-contracts";
 import { readWithdrawQueue } from "@morpho-blue-offchain-public/uikit/lens/read-withdraw-queue";
 import {
   formatBalanceWithSymbol,
+  formatApy,
   formatLtv,
   getTokenSymbolURI,
   Token,
@@ -33,7 +33,7 @@ import { blo } from "blo";
 import { Eye, Info } from "lucide-react";
 import { useMemo } from "react";
 import { Address, erc20Abi, isAddressEqual, Hex } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContracts } from "wagmi";
 
 import { BorrowSheetContent } from "@/components/borrow-sheet-content";
 import { CtaCard } from "@/components/cta-card";
@@ -183,7 +183,7 @@ export function BorrowSubPage() {
     query: { staleTime: Infinity, gcTime: Infinity },
   });
 
-  const { data: markets } = useReadContracts({
+  const { data: marketsRaw } = useReadContracts({
     contracts: filteredCreateMarketArgs.map(
       (args) =>
         ({
@@ -195,6 +195,35 @@ export function BorrowSubPage() {
     ),
     allowFailure: false,
     query: { staleTime: 10 * 60 * 1000, gcTime: Infinity, placeholderData: keepPreviousData, enabled: !!morpho },
+  });
+
+  const markets = useMemo(
+    () =>
+      marketsRaw?.map((market) => ({
+        totalSupplyAssets: market[0],
+        totalSupplyShares: market[1],
+        totalBorrowAssets: market[2],
+        totalBorrowShares: market[3],
+        lastUpdate: market[4],
+        fee: market[5],
+      })),
+    [marketsRaw],
+  );
+
+  const { data: apss } = useReadContracts({
+    contracts: filteredCreateMarketArgs.map((args, idx) => ({
+      address: args.marketParams.irm,
+      abi: irmAbi,
+      functionName: "borrowRateView",
+      args: markets ? [args.marketParams, markets[idx]] : undefined,
+    })),
+    allowFailure: true,
+    query: {
+      staleTime: 10 * 60 * 1000,
+      gcTime: Infinity,
+      placeholderData: keepPreviousData,
+      enabled: !!morpho && !!markets,
+    },
   });
 
   const { data: positionsRaw, refetch: refetchPositionsRaw } = useReadContracts({
@@ -250,18 +279,13 @@ export function BorrowSubPage() {
       <div className="bg-background dark:bg-background/30 flex grow justify-center rounded-t-xl">
         <div className="text-primary w-full max-w-5xl px-8 pb-32 pt-8">
           <Table className="border-separate border-spacing-y-3">
-            <TableCaption>
-              Showing markets in which you've opened positions.
-              <br />
-              Click on a market to manage your position.
-            </TableCaption>
             <TableHeader className="bg-secondary">
               <TableRow>
                 <TableHead className="text-primary rounded-l-lg pl-4 text-xs font-light">Collateral</TableHead>
                 <TableHead className="text-primary text-xs font-light">Loan</TableHead>
                 <TableHead className="text-primary text-xs font-light">LLTV</TableHead>
                 <TableHead className="text-primary text-xs font-light">Position</TableHead>
-                <TableHead className="text-primary rounded-r-lg text-xs font-light">
+                <TableHead className="text-primary text-xs font-light">
                   <div className="flex items-center gap-1">
                     Liquidity
                     <TooltipProvider>
@@ -269,7 +293,7 @@ export function BorrowSubPage() {
                         <TooltipTrigger asChild>
                           <Info className="h-4 w-4" />
                         </TooltipTrigger>
-                        <TooltipContent className="text-secondary max-w-56 p-3 font-light">
+                        <TooltipContent className="text-primary max-w-56 rounded-3xl p-4 font-mono shadow-2xl">
                           This value will be smaller than that of the full app. It doesn't include shared market
                           liquidity which could be reallocated upon borrow.
                         </TooltipContent>
@@ -277,6 +301,7 @@ export function BorrowSubPage() {
                     </TooltipProvider>
                   </div>
                 </TableHead>
+                <TableHead className="text-primary rounded-r-lg text-xs font-light">Rate</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -304,7 +329,7 @@ export function BorrowSubPage() {
                               <TooltipTrigger asChild>
                                 <Eye className="h-4 w-4" />
                               </TooltipTrigger>
-                              <TooltipContent className="text-secondary max-w-56 p-3 font-light">
+                              <TooltipContent className="text-primary max-w-56 rounded-3xl p-4 font-mono shadow-2xl">
                                 <h3>Collateral</h3>
                                 <p>
                                   {positionsRaw && tokens.get(args.marketParams.collateralToken)?.decimals !== undefined
@@ -324,8 +349,8 @@ export function BorrowSubPage() {
                                   tokens.get(args.marketParams.loanToken)?.decimals !== undefined
                                     ? formatBalanceWithSymbol(
                                         MarketUtils.toBorrowAssets(positionsRaw[idx][1], {
-                                          totalBorrowAssets: markets[idx][2],
-                                          totalBorrowShares: markets[idx][3],
+                                          totalBorrowAssets: markets[idx].totalBorrowAssets,
+                                          totalBorrowShares: markets[idx].totalBorrowShares,
                                         }),
                                         tokens.get(args.marketParams.loanToken)!.decimals!,
                                         tokens.get(args.marketParams.loanToken)!.symbol,
@@ -339,15 +364,20 @@ export function BorrowSubPage() {
                           </TooltipProvider>
                         }
                       </TableCell>
-                      <TableCell className="rounded-r-lg">
+                      <TableCell>
                         {markets && tokens.get(args.marketParams.loanToken)?.decimals !== undefined
                           ? formatBalanceWithSymbol(
-                              markets[idx][0] - markets[idx][2],
+                              markets[idx].totalSupplyAssets - markets[idx].totalBorrowAssets,
                               tokens.get(args.marketParams.loanToken)!.decimals!,
                               tokens.get(args.marketParams.loanToken)!.symbol,
                               5,
                               true,
                             )
+                          : "－"}
+                      </TableCell>
+                      <TableCell className="rounded-r-lg">
+                        {apss?.[idx].status === "success"
+                          ? `${formatApy(MarketUtils.compoundRate(apss[idx].result))}`
                           : "－"}
                       </TableCell>
                     </TableRow>
@@ -359,12 +389,7 @@ export function BorrowSubPage() {
                       markets
                         ? {
                             params: new MarketParams(args.marketParams),
-                            totalSupplyAssets: markets[idx][0],
-                            totalSupplyShares: markets[idx][1],
-                            totalBorrowAssets: markets[idx][2],
-                            totalBorrowShares: markets[idx][3],
-                            lastUpdate: markets[idx][4],
-                            fee: markets[idx][5],
+                            ...markets[idx],
                           }
                         : undefined
                     }

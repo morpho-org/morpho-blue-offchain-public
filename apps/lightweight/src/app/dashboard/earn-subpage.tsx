@@ -17,7 +17,6 @@ import {
   TooltipTrigger,
 } from "@morpho-blue-offchain-public/uikit/components/shadcn/tooltip";
 import useContractEvents from "@morpho-blue-offchain-public/uikit/hooks/use-contract-events/use-contract-events";
-import { useReadContracts } from "@morpho-blue-offchain-public/uikit/hooks/use-read-contracts";
 import { readWithdrawQueue } from "@morpho-blue-offchain-public/uikit/lens/read-withdraw-queue";
 import { formatBalanceWithSymbol, getTokenSymbolURI, Token } from "@morpho-blue-offchain-public/uikit/lib/utils";
 import { blo } from "blo";
@@ -25,7 +24,7 @@ import { blo } from "blo";
 import humanizeDuration from "humanize-duration";
 import { useMemo } from "react";
 import { Address, erc20Abi, isAddressEqual } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContracts } from "wagmi";
 
 import { CtaCard } from "@/components/cta-card";
 import { EarnSheetContent } from "@/components/earn-sheet-content";
