@@ -24,6 +24,8 @@ import {
   worldchain,
 } from "wagmi/chains";
 
+import { AddressScreeningModal } from "@/components/address-screening-modal";
+import { AddressScreeningProvider } from "@/hooks/use-address-screening";
 import { TERMS_OF_USE } from "@/lib/constants";
 
 const httpConfig: HttpTransportConfig = {
@@ -201,7 +203,10 @@ function App() {
           }}
         >
           <UrqlProvider value={urqlClient}>
-            <Outlet />
+            <AddressScreeningProvider>
+              <Outlet />
+              <AddressScreeningModal />
+            </AddressScreeningProvider>
           </UrqlProvider>
         </ConnectKitProvider>
       </PersistQueryClientProvider>
