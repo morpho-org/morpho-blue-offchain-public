@@ -21,6 +21,7 @@ import {
   Token,
   getTokenSymbolURI,
   formatLtv,
+  abbreviateAddress,
 } from "@morpho-blue-offchain-public/uikit/lib/utils";
 import { AccrualVault } from "@morpho-org/blue-sdk";
 import { blo } from "blo";
@@ -73,10 +74,7 @@ function VaultTableCell({
           <br />
           <div className="flex items-center gap-1">
             <p>
-              Vault:{" "}
-              <code>
-                {address.slice(0, 6)}...{address.slice(-4)}
-              </code>
+              Vault: <code>{abbreviateAddress(address)}</code>
             </p>
             {chain?.blockExplorers?.default.url && (
               <a
@@ -120,10 +118,7 @@ function CuratorTableCell({
           {roles.map((role) => (
             <div className="flex items-center gap-1" key={role.name}>
               <p>
-                {role.name}:{" "}
-                <code>
-                  {role.address.slice(0, 6)}...{role.address.slice(-4)}
-                </code>
+                {role.name}: <code>{abbreviateAddress(role.address)}</code>
               </p>
               {chain?.blockExplorers?.default.url && (
                 <a
@@ -233,7 +228,7 @@ function CollateralsTableCell({
                       rel="noopener noreferrer"
                       target="_blank"
                     >
-                      {`${oracle.slice(0, 6)}...${oracle.slice(-4)}`}
+                      {abbreviateAddress(oracle)}
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   ))}
@@ -278,7 +273,7 @@ export function EarnTable({
         </TableHeader>
         <TableBody>
           {rows.map((row) => {
-            const ownerText = `${row.vault.owner.slice(0, 6)}...${row.vault.owner.slice(-4)}`;
+            const ownerText = abbreviateAddress(row.vault.owner);
             const deposits = depositsMode === "maxWithdraw" ? row.maxWithdraw : row.vault.totalAssets;
             return (
               <Sheet

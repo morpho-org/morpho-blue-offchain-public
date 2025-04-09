@@ -14,7 +14,12 @@ import {
   TableRow,
 } from "@morpho-blue-offchain-public/uikit/components/shadcn/table";
 import useContractEvents from "@morpho-blue-offchain-public/uikit/hooks/use-contract-events/use-contract-events";
-import { formatBalanceWithSymbol, getTokenSymbolURI, Token } from "@morpho-blue-offchain-public/uikit/lib/utils";
+import {
+  abbreviateAddress,
+  formatBalanceWithSymbol,
+  getTokenSymbolURI,
+  Token,
+} from "@morpho-blue-offchain-public/uikit/lib/utils";
 import { keepPreviousData } from "@tanstack/react-query";
 import { blo } from "blo";
 // @ts-expect-error: this package lacks types
@@ -38,7 +43,7 @@ function TokenTableCell({ address, symbol, imageSrc }: Token) {
         </AvatarFallback>
       </Avatar>
       {symbol ?? "－"}
-      <span className="text-primary/30 font-mono">{`${address.slice(0, 6)}...${address.slice(-4)}`}</span>
+      <span className="text-primary/30 font-mono">{abbreviateAddress(address)}</span>
     </div>
   );
 }
@@ -282,9 +287,7 @@ export function EarnSubPage() {
                             )
                           : "－"}
                       </TableCell>
-                      <TableCell>
-                        {vault.info?.owner ? `${vault.info.owner.slice(0, 6)}...${vault.info.owner.slice(-4)}` : "－"}
-                      </TableCell>
+                      <TableCell>{vault.info?.owner ? abbreviateAddress(vault.info.owner) : "－"}</TableCell>
                       <TableCell className="rounded-r-lg">
                         {vault.info ? humanizeDuration(Number(vault.info.timelock) * 1000) : "－"}
                       </TableCell>

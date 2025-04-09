@@ -47,7 +47,6 @@
   "peerDependencies": {
     "@tanstack/react-query": "^5.66.0",
     "blo": "^1.2.0",
-    "connectkit": "^1.8.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "recharts": "^2.15.1",
@@ -68,7 +67,6 @@
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "blo": "^1.2.0",
-    "connectkit": "^1.8.2",
     "effect": "3.13.2",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",

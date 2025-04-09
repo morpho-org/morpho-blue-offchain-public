@@ -26,7 +26,7 @@ import {
 } from "@/components/shadcn/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/shadcn/popover";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/shadcn/select";
-import { getChainSlug } from "@/lib/utils";
+import { abbreviateAddress, getChainSlug } from "@/lib/utils";
 
 function ConnectWalletButton() {
   const { connectors, connect } = useConnect();
@@ -90,7 +90,7 @@ function WalletButton({ address }: { address: Address }) {
           <Avatar className="h-4 w-4">
             <AvatarImage src={ensAvatar ?? blo(address)} alt="Avatar" />
           </Avatar>
-          {ensName ?? `${address.slice(0, 6)}...${address.slice(-4)}`}
+          {ensName ?? abbreviateAddress(address)}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-min rounded-xl">

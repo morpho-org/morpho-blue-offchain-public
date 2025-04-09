@@ -14,7 +14,13 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@morpho-blue-offchain-public/uikit/components/shadcn/tooltip";
-import { formatLtv, formatBalanceWithSymbol, formatApy, Token } from "@morpho-blue-offchain-public/uikit/lib/utils";
+import {
+  formatLtv,
+  formatBalanceWithSymbol,
+  formatApy,
+  Token,
+  abbreviateAddress,
+} from "@morpho-blue-offchain-public/uikit/lib/utils";
 import { AccrualPosition, Market } from "@morpho-org/blue-sdk";
 import { blo } from "blo";
 import { ExternalLink, Info } from "lucide-react";
@@ -41,10 +47,7 @@ function TokenTableCell({ address, symbol, imageSrc, chain }: Token & { chain: C
         <TooltipContent className="text-primary rounded-3xl p-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-1">
             <p>
-              Address:{" "}
-              <code>
-                {address.slice(0, 6)}...{address.slice(-4)}
-              </code>
+              Address: <code>{abbreviateAddress(address)}</code>
             </p>
             {chain?.blockExplorers?.default.url && (
               <a

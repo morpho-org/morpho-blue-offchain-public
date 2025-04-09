@@ -1,7 +1,7 @@
 import { getChainSlug } from "@morpho-blue-offchain-public/uikit/lib/utils";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
 
 import "@/index.css";
 import { BorrowSubPage } from "@/app/dashboard/borrow-subpage.tsx";
@@ -14,7 +14,14 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<App />}>
+        <Route
+          path="/"
+          element={
+            <App>
+              <Outlet />
+            </App>
+          }
+        >
           <Route index element={<Navigate replace to={getChainSlug(DEFAULT_CHAIN)} />} />
           <Route path=":chain/">
             <Route index element={<Navigate replace to="earn" />} />

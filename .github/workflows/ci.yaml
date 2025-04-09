@@ -1,0 +1,38 @@
+name: Run vitest
+on:
+  pull_request:
+    branches:
+      - "main"
+jobs:
+  vitest:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        node-version: [22]
+    env:
+      VITE_WALLET_KIT_PROJECT_ID: ${{ secrets.WALLET_KIT_PROJECT_ID }}
+      VITE_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build UIKit
+        run: pnpm run uikit:build
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Create .env
+        run: |
+          echo "VITE_WALLET_KIT_PROJECT_ID=${{ env.VITE_WALLET_KIT_PROJECT_ID }}" > apps/lightweight/.env
+          echo "VITE_ALCHEMY_API_KEY=${{ env.VITE_ALCHEMY_API_KEY }}" > apps/lightweight/.env
+      - name: Test
+        run: pnpm vitest

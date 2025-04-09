@@ -3,7 +3,8 @@
   "references": [
     { "path": "./tsconfig.package.json" },
     { "path": "./tsconfig.example.json" },
-    { "path": "./tsconfig.node.json" }
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.test.json" }
   ],
   "compilerOptions": {
     "strict": true,

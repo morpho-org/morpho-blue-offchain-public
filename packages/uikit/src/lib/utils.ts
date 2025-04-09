@@ -52,6 +52,10 @@ export function formatApy(apy: bigint) {
   return `${(Number(apy / 1_000_000_000n) / 1e7).toFixed(2)}%`;
 }
 
+export function abbreviateAddress(address: Address) {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
 export type Token = { address: Address; symbol?: string; decimals?: number; imageSrc: string };
 
 /**

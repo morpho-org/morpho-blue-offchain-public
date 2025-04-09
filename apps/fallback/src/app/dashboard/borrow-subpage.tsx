@@ -20,6 +20,7 @@ import {
 } from "@morpho-blue-offchain-public/uikit/components/shadcn/tooltip";
 import useContractEvents from "@morpho-blue-offchain-public/uikit/hooks/use-contract-events/use-contract-events";
 import {
+  abbreviateAddress,
   formatBalanceWithSymbol,
   formatLtv,
   getTokenSymbolURI,
@@ -48,7 +49,7 @@ function TokenTableCell({ address, symbol, imageSrc }: Token) {
         </AvatarFallback>
       </Avatar>
       {symbol ?? "－"}
-      <span className="text-primary/30 font-mono">{`${address.slice(0, 6)}...${address.slice(-4)}`}</span>
+      <span className="text-primary/30 font-mono">{abbreviateAddress(address)}</span>
     </div>
   );
 }
