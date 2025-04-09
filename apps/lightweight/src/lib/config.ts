@@ -18,6 +18,8 @@ import {
   worldchain,
 } from "wagmi/chains";
 
+import { APP_DETAILS } from "@/lib/constants";
+
 const httpConfig: HttpTransportConfig = {
   retryDelay: 0,
   timeout: 30_000,
@@ -140,14 +142,14 @@ export function createConfig(args: {
       transports: args.transports ?? transports,
       connectors: args.connectors,
       walletConnectProjectId: import.meta.env.VITE_WALLET_KIT_PROJECT_ID!,
-      appName: "Morpho | Lightweight App",
-      appDescription: "", // TODO:
-      appUrl: "https://lightweight.morpho.org",
-      appIcon: "", // TODO:
+      appName: APP_DETAILS.name,
+      appDescription: APP_DETAILS.description,
+      appUrl: APP_DETAILS.url,
+      appIcon: APP_DETAILS.icon,
       batch: {
         multicall: {
           batchSize: 2 ** 16,
-          wait: 250,
+          wait: 100,
         },
       },
       cacheTime: 500,

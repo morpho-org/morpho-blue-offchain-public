@@ -25,13 +25,12 @@ export function AddressScreeningModal() {
     <AlertDialog open={!isAuthorized}>
       <AlertDialogContent className="border-destructive bg-card">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-red-500">Account Restricted</AlertDialogTitle>
+          <AlertDialogTitle className="text-red-500">Access Denied</AlertDialogTitle>
           <AlertDialogDescription className="text-primary">
-            We&apos;re unable to provide service to this address due to compliance requirements.
+            We&apos;re sorry, but your address is not permitted to use this application for compliance reasons.
             <br />
             <br />
-            Morpho Labs is committed to compliance with applicable laws and regulations, including sanctions and
-            anti-money laundering requirements.
+            If you believe this is an error, please contact us at contact@morpho.org.
           </AlertDialogDescription>
         </AlertDialogHeader>
       </AlertDialogContent>

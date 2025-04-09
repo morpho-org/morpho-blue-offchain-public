@@ -4,14 +4,14 @@ import { WalletMenu } from "@morpho-blue-offchain-public/uikit/components/wallet
 import { getChainSlug } from "@morpho-blue-offchain-public/uikit/lib/utils";
 import { ConnectKitButton } from "connectkit";
 import { ExternalLink } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Link, Outlet, useLocation, useNavigate, useParams } from "react-router";
 import { extractChain } from "viem";
 import { useChains } from "wagmi";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { ADDRESSES_DOCUMENTATION, CORE_DEPLOYMENTS } from "@/lib/constants";
+import { ADDRESSES_DOCUMENTATION, APP_DETAILS, CORE_DEPLOYMENTS } from "@/lib/constants";
 
 enum SubPage {
   Earn = "earn",
@@ -57,6 +57,10 @@ export default function Page() {
     },
     [navigate, selectedSubPage, chains],
   );
+
+  useEffect(() => {
+    document.title = `${APP_DETAILS.name} | ${selectedSubPage.charAt(0).toUpperCase()}${selectedSubPage.slice(1)}`;
+  }, [selectedSubPage]);
 
   return (
     <div className="bg-gray-200 dark:bg-neutral-900">

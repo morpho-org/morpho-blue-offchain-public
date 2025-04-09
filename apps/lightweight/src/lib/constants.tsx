@@ -30,6 +30,14 @@ type Deployments = {
   };
 };
 
+export const APP_DETAILS = {
+  // NOTE: Should always match the title in `index.html` (won't break anything, but should be correct)
+  name: "Morpho Lite",
+  description: "A minimal and open-source version of the main Morpho App",
+  url: "https://lite.morpho.org",
+  icon: "/morpho.svg",
+};
+
 export const GITHUB_OWNER = "morpho-org";
 export const GITHUB_REPO = "morpho-blue-offchain-public";
 export const GITHUB_REPO_URL = `https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}`;
