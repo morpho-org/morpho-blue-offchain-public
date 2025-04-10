@@ -120,6 +120,12 @@ export function BorrowSheetContent({
     };
   }, [textInputValue, selectedTab, tokens, marketParams]);
 
+  let withdrawCollateralMax = accrualPosition?.withdrawableCollateral;
+  if (withdrawCollateralMax !== undefined) withdrawCollateralMax = (withdrawCollateralMax * 999n) / 1000n; // safety
+  const borrowMax = accrualPosition?.maxBorrowableAssets;
+  const repayMax = accrualPosition ? accrualPosition.borrowAssets : undefined;
+  const isRepayMax = inputValue === repayMax;
+
   const approvalTxnConfig =
     token !== undefined &&
     inputValue !== undefined &&
@@ -129,7 +135,7 @@ export function BorrowSheetContent({
           address: token.address,
           abi: erc20Abi,
           functionName: "approve",
-          args: [morpho, inputValue],
+          args: [morpho, isRepayMax ? (inputValue * 1001n) / 1000n : inputValue],
         } as const)
       : undefined;
 
@@ -170,7 +176,7 @@ export function BorrowSheetContent({
           abi: morphoAbi,
           functionName: "repay",
           args:
-            inputValue === accrualPosition?.borrowAssets && position !== undefined
+            isRepayMax && position !== undefined
               ? ([{ ...marketParams }, 0n, position.borrowShares, userAddress, "0x"] as const) // max repay with shares
               : ([{ ...marketParams }, inputValue, 0n, userAddress, "0x"] as const), // normal repay with assets
         } as const)
@@ -182,11 +188,6 @@ export function BorrowSheetContent({
     imageSrc: collateralImgSrc,
   } = tokens.get(marketParams.collateralToken) ?? {};
   const { symbol: loanSymbol, decimals: loanDecimals, imageSrc: loanImgSrc } = tokens.get(marketParams.loanToken) ?? {};
-
-  let withdrawCollateralMax = accrualPosition?.withdrawableCollateral;
-  if (withdrawCollateralMax !== undefined) withdrawCollateralMax = (withdrawCollateralMax * 999n) / 1000n; // safety
-  const borrowMax = accrualPosition?.maxBorrowableAssets;
-  const repayMax = accrualPosition?.borrowAssets;
 
   return (
     <SheetContent className="z-[9999] gap-3 overflow-y-scroll sm:min-w-[500px] dark:bg-neutral-900">
