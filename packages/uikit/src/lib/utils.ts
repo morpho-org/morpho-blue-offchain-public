@@ -10,6 +10,17 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function tryFormatBalance(
+  balance: bigint | undefined,
+  decimals: number | undefined,
+  maxSigDigits: number | "exact" = "exact",
+  enableSuffixes = false,
+) {
+  return balance === undefined || decimals === undefined
+    ? undefined
+    : formatBalance(balance, decimals, maxSigDigits, enableSuffixes);
+}
+
 export function formatBalance(
   balance: bigint,
   decimals: number,

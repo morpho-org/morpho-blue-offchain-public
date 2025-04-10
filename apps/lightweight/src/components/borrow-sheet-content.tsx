@@ -1,5 +1,6 @@
 import { morphoAbi } from "@morpho-blue-offchain-public/uikit/assets/abis/morpho";
 import { oracleAbi } from "@morpho-blue-offchain-public/uikit/assets/abis/oracle";
+import { AnimateIn } from "@morpho-blue-offchain-public/uikit/components/animate-in";
 import { Button } from "@morpho-blue-offchain-public/uikit/components/shadcn/button";
 import {
   SheetContent,
@@ -12,10 +13,10 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@morpho-blue-offchain-public/uikit/components/shadcn/tabs";
 import { TokenAmountInput } from "@morpho-blue-offchain-public/uikit/components/token-amount-input";
 import { TransactionButton } from "@morpho-blue-offchain-public/uikit/components/transaction-button";
-import { formatBalance, formatLtv, Token } from "@morpho-blue-offchain-public/uikit/lib/utils";
+import { tryFormatBalance, formatLtv, Token } from "@morpho-blue-offchain-public/uikit/lib/utils";
 import { AccrualPosition, IMarket, Market, MarketId, MarketParams, Position } from "@morpho-org/blue-sdk";
 import { keepPreviousData } from "@tanstack/react-query";
-import { CircleArrowLeft } from "lucide-react";
+import { ArrowRight, CircleArrowLeft } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Toaster } from "sonner";
 import { Address, erc20Abi, parseUnits } from "viem";
@@ -28,6 +29,27 @@ enum Actions {
   WithdrawCollateral = "Withdraw",
   Borrow = "Borrow",
   Repay = "Repay",
+}
+
+function PositionProperty({ current, updated }: { current: string; updated?: string }) {
+  if (updated === undefined || current === updated) {
+    return <p className="text-lg font-medium">{current}</p>;
+  }
+  return (
+    <div className="flex items-center gap-1">
+      <p className="text-primary/50 text-lg font-medium">{current}</p>
+      <AnimateIn
+        className="flex items-center gap-1"
+        from="opacity-0 translate-x-[-16px]"
+        duration={250}
+        to="opacity-100 translate-x-[0px]"
+        style={{ transitionTimingFunction: "cubic-bezier(0.25, 0.4, 0.55, 1.4)" }}
+      >
+        <ArrowRight height={16} width={16} className="text-primary/50" />
+        <p>{updated}</p>
+      </AnimateIn>
+    </div>
+  );
 }
 
 export function BorrowSheetContent({
@@ -121,7 +143,9 @@ export function BorrowSheetContent({
   }, [textInputValue, selectedTab, tokens, marketParams]);
 
   let withdrawCollateralMax = accrualPosition?.withdrawableCollateral;
-  if (withdrawCollateralMax !== undefined) withdrawCollateralMax = (withdrawCollateralMax * 999n) / 1000n; // safety
+  if (withdrawCollateralMax !== undefined && accrualPosition!.borrowAssets > 0n) {
+    withdrawCollateralMax = (withdrawCollateralMax * 999n) / 1000n; // safety since interest is accruing
+  }
   const borrowMax = accrualPosition?.maxBorrowableAssets;
   const repayMax = accrualPosition ? accrualPosition.borrowAssets : undefined;
   const isRepayMax = inputValue === repayMax;
@@ -189,6 +213,41 @@ export function BorrowSheetContent({
   } = tokens.get(marketParams.collateralToken) ?? {};
   const { symbol: loanSymbol, decimals: loanDecimals, imageSrc: loanImgSrc } = tokens.get(marketParams.loanToken) ?? {};
 
+  let newAccrualPosition: AccrualPosition | undefined = undefined;
+  let error: Error | null = null;
+  if (accrualPosition && inputValue) {
+    try {
+      switch (selectedTab) {
+        case Actions.SupplyCollateral:
+          newAccrualPosition = new AccrualPosition(
+            accrualPosition,
+            new Market(accrualPosition.market),
+          ).supplyCollateral(inputValue);
+          break;
+        case Actions.WithdrawCollateral:
+          newAccrualPosition = new AccrualPosition(
+            accrualPosition,
+            new Market(accrualPosition.market),
+          ).withdrawCollateral(inputValue);
+          break;
+        case Actions.Borrow:
+          newAccrualPosition = new AccrualPosition(accrualPosition, new Market(accrualPosition.market)).borrow(
+            inputValue,
+            0n,
+          ).position;
+          break;
+        case Actions.Repay:
+          newAccrualPosition = new AccrualPosition(accrualPosition, new Market(accrualPosition.market)).repay(
+            isRepayMax ? 0n : inputValue,
+            isRepayMax ? position!.borrowShares : 0n,
+          ).position;
+          break;
+      }
+    } catch (e) {
+      error = e as Error;
+    }
+  }
+
   return (
     <SheetContent className="z-[9999] gap-3 overflow-y-scroll sm:min-w-[500px] dark:bg-neutral-900">
       <Toaster theme="dark" position="bottom-left" richColors />
@@ -206,26 +265,28 @@ export function BorrowSheetContent({
           My collateral position {collateralSymbol ? `(${collateralSymbol})` : ""}
           <img className="rounded-full" height={16} width={16} src={collateralImgSrc} />
         </div>
-        <p className="text-lg font-medium">
-          {accrualPosition?.collateral !== undefined && collateralDecimals !== undefined
-            ? formatBalance(accrualPosition.collateral, collateralDecimals, 5)
-            : "－"}
-        </p>
+        <PositionProperty
+          current={tryFormatBalance(accrualPosition?.collateral, collateralDecimals, 5) ?? "－"}
+          updated={tryFormatBalance(newAccrualPosition?.collateral, collateralDecimals, 5)}
+        />
         <div className="text-primary/70 flex items-center justify-between text-xs font-light">
           My loan position {loanSymbol ? `(${loanSymbol})` : ""}
           <img className="rounded-full" height={16} width={16} src={loanImgSrc} />
         </div>
-        <p className="text-lg font-medium">
-          {accrualPosition?.borrowAssets !== undefined && loanDecimals !== undefined
-            ? formatBalance(accrualPosition.borrowAssets, loanDecimals, 5)
-            : "－"}
-        </p>
+        <PositionProperty
+          current={tryFormatBalance(accrualPosition?.borrowAssets, loanDecimals) ?? "－"}
+          updated={tryFormatBalance(newAccrualPosition?.borrowAssets, loanDecimals)}
+        />
         <div className="text-primary/70 flex items-center justify-between text-xs font-light">
           LTV / Liquidation LTV
         </div>
-        <p className="text-lg font-medium">
-          {accrualPosition?.ltv ? formatLtv(accrualPosition.ltv) : "－"} / {formatLtv(marketParams.lltv)}
-        </p>
+        <PositionProperty
+          current={`${accrualPosition?.ltv !== undefined ? formatLtv(accrualPosition.ltv ?? 0n) : "－"} / ${formatLtv(marketParams.lltv)}`}
+          updated={
+            newAccrualPosition &&
+            `${newAccrualPosition?.ltv !== undefined ? formatLtv(newAccrualPosition.ltv ?? 0n) : "－"} / ${formatLtv(marketParams.lltv)}`
+          }
+        />
       </div>
       <Tabs
         defaultValue={Actions.SupplyCollateral}
@@ -362,6 +423,7 @@ export function BorrowSheetContent({
           )}
         </TabsContent>
       </Tabs>
+      <p className="break-words px-12 text-center text-xs text-red-500">{error?.message}</p>
       <SheetFooter>
         <SheetClose asChild>
           <Button className="text-md h-12 w-full rounded-full font-light" type="submit">
