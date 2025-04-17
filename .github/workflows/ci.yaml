@@ -14,8 +14,9 @@ jobs:
       matrix:
         node-version: [22]
     env:
-      VITE_WALLET_KIT_PROJECT_ID: ${{ secrets.WALLET_KIT_PROJECT_ID }}
-      VITE_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      VITE_WALLET_KIT_PROJECT_ID: ${{ secrets.VITE_WALLET_KIT_PROJECT_ID }}
+      VITE_ALCHEMY_API_KEY: ${{ secrets.VITE_ALCHEMY_API_KEY }}
+      VITE_APP_TITLE: ${{ vars.VITE_APP_TITLE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,7 +37,8 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
       - name: Create .env
         run: |
-          echo "VITE_WALLET_KIT_PROJECT_ID=${{ env.VITE_WALLET_KIT_PROJECT_ID }}" > apps/lightweight/.env
-          echo "VITE_ALCHEMY_API_KEY=${{ env.VITE_ALCHEMY_API_KEY }}" > apps/lightweight/.env
+          echo "VITE_WALLET_KIT_PROJECT_ID=${{ env.VITE_WALLET_KIT_PROJECT_ID }}" >> apps/lightweight/.env
+          echo "VITE_ALCHEMY_API_KEY=${{ env.VITE_ALCHEMY_API_KEY }}" >> apps/lightweight/.env
+          echo "VITE_APP_TITLE=${{ env.VITE_APP_TITLE }}" >> apps/lightweight/.env
       - name: Test
         run: pnpm vitest
