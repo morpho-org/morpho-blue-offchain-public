@@ -16,6 +16,8 @@ export const MIN_TIMELOCK = 3 * 24 * 60 * 60; // For filtering vaults
 
 export const DEFAULT_CHAIN = polygon;
 
+export const TRANSACTION_DATA_SUFFIX = "0x117E"; // (L I T E)
+
 export const TERMS_OF_USE = "https://cdn.morpho.org/documents/Morpho_Terms_of_Use.pdf";
 export const RISKS_DOCUMENTATION = "https://docs.morpho.org/overview/resources/risks/";
 export const ADDRESSES_DOCUMENTATION = "https://docs.morpho.org/overview/resources/addresses/";
