@@ -26,6 +26,7 @@
     "@tanstack/react-query-persist-client": "^5.66.0",
     "blo": "^1.2.0",
     "connectkit": "^1.8.2",
+    "core-js": "3.42.0",
     "gql.tada": "^1.8.10",
     "humanize-duration": "^3.32.1",
     "lucide-react": "^0.475.0",
@@ -44,7 +45,6 @@
   "devDependencies": {
     "@fleek-platform/cli": "^3.8.2",
     "@tailwindcss/vite": "^4.0.6",
-    "@vitejs/plugin-legacy": "^6.1.1",
     "@vitejs/plugin-react": "^4.3.4",
     "tailwindcss": "^4.0.6",
     "terser": "^5.39.0",

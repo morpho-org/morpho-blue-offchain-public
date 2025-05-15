@@ -1,4 +1,5 @@
 import { getChainSlug } from "@morpho-org/uikit/lib/utils";
+import "core-js/stable/array/iterator";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
