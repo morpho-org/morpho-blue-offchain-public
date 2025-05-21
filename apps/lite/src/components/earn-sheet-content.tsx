@@ -18,7 +18,7 @@ import { Toaster } from "sonner";
 import { Address, erc20Abi, erc4626Abi, parseUnits } from "viem";
 import { useAccount, useReadContract, useReadContracts } from "wagmi";
 
-import { RISKS_DOCUMENTATION } from "@/lib/constants";
+import { RISKS_DOCUMENTATION, TRANSACTION_DATA_SUFFIX } from "@/lib/constants";
 
 enum Actions {
   Deposit = "Deposit",
@@ -75,6 +75,7 @@ export function EarnSheetContent({ vaultAddress, asset }: { vaultAddress: Addres
           abi: erc4626Abi,
           functionName: "deposit",
           args: [inputValue, userAddress],
+          dataSuffix: TRANSACTION_DATA_SUFFIX,
         } as const)
       : undefined;
 
@@ -86,12 +87,14 @@ export function EarnSheetContent({ vaultAddress, asset }: { vaultAddress: Addres
             abi: erc4626Abi,
             functionName: "redeem",
             args: [maxes![1], userAddress, userAddress],
+            dataSuffix: TRANSACTION_DATA_SUFFIX,
           } as const)
         : ({
             address: vaultAddress,
             abi: erc4626Abi,
             functionName: "withdraw",
             args: [inputValue, userAddress, userAddress],
+            dataSuffix: TRANSACTION_DATA_SUFFIX,
           } as const)
       : undefined;
 

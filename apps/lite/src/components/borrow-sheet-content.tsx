@@ -23,7 +23,7 @@ import { Toaster } from "sonner";
 import { Address, erc20Abi, parseUnits } from "viem";
 import { useAccount, useChainId, useReadContract, useReadContracts } from "wagmi";
 
-import { RISKS_DOCUMENTATION } from "@/lib/constants";
+import { RISKS_DOCUMENTATION, TRANSACTION_DATA_SUFFIX } from "@/lib/constants";
 
 enum Actions {
   SupplyCollateral = "Supply",
@@ -177,6 +177,7 @@ export function BorrowSheetContent({
           abi: morphoAbi,
           functionName: "supplyCollateral",
           args: [{ ...marketParams }, inputValue, userAddress, "0x"],
+          dataSuffix: TRANSACTION_DATA_SUFFIX,
         } as const)
       : undefined;
 
@@ -187,6 +188,7 @@ export function BorrowSheetContent({
           abi: morphoAbi,
           functionName: "withdrawCollateral",
           args: [{ ...marketParams }, inputValue, userAddress, userAddress],
+          dataSuffix: TRANSACTION_DATA_SUFFIX,
         } as const)
       : undefined;
 
@@ -197,6 +199,7 @@ export function BorrowSheetContent({
           abi: morphoAbi,
           functionName: "borrow",
           args: [{ ...marketParams }, inputValue, 0n, userAddress, userAddress],
+          dataSuffix: TRANSACTION_DATA_SUFFIX,
         } as const)
       : undefined;
 
@@ -210,6 +213,7 @@ export function BorrowSheetContent({
             isRepayMax && position !== undefined
               ? ([{ ...marketParams }, 0n, position.borrowShares, userAddress, "0x"] as const) // max repay with shares
               : ([{ ...marketParams }, inputValue, 0n, userAddress, "0x"] as const), // normal repay with assets
+          dataSuffix: TRANSACTION_DATA_SUFFIX,
         } as const)
       : undefined;
 
