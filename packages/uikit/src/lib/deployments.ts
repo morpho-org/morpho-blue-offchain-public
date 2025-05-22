@@ -120,7 +120,7 @@ export const DEPLOYMENTS: Deployments = {
   },
 };
 
-export const CORE_DEPLOYMENTS = new Set<keyof Deployments>([mainnet.id, base.id]);
+export const CORE_DEPLOYMENTS = new Set<keyof Deployments>([mainnet.id, base.id, polygon.id]);
 
 export function getContractDeploymentInfo(chainId: number, name: OptionalContracts): DeploymentDetails | undefined;
 export function getContractDeploymentInfo(chainId: number, name: RequiredContracts): DeploymentDetails;
